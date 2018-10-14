@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -23,6 +24,9 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -105,7 +109,6 @@ public class Refresh_IP_Activity extends BaseActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
         }
     };
 
@@ -113,6 +116,7 @@ public class Refresh_IP_Activity extends BaseActivity {
     protected void initViews(Bundle savedInstanceState) {
         setContentView(R.layout.refresh_activity);
         ButterKnife.bind(this);
+
     }
 
     @Override
@@ -120,22 +124,28 @@ public class Refresh_IP_Activity extends BaseActivity {
         clientList = ((MyAppliction) getApplication()).clientList;
         ip_adapter = new IP_Adapter(Refresh_IP_Activity.this, clientList);
         addPopupWindow = new AddPopupWindow(this);
+//        addPopupWindow.showAtLocation(this.getCurrentFocus(), Gravity.NO_GRAVITY, 0, 0);
     }
 
     @Override
     protected void loadData() {
         ipList.setAdapter(ip_adapter);
         bindService(new Intent(Refresh_IP_Activity.this, ServerService.class), myServiceConn, Service.BIND_AUTO_CREATE);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindService(myServiceConn);
+        EventBus.getDefault().unregister(this);
     }
 
     @OnClick({R.id.actionbar_back, R.id.actionbar_other, R.id.refresh_ip_ac_add_msg})
     public void onViewClicked(View view) {
+        DisplayMetrics displayMetrics = view.getContext().getResources().getDisplayMetrics();
+        int heightPixels = displayMetrics.heightPixels;
+        ;
         switch (view.getId()) {
             case R.id.actionbar_back:
                 Log.e("Refresh_IP_Activity", "actionbar_back: ");
@@ -172,7 +182,7 @@ public class Refresh_IP_Activity extends BaseActivity {
                         refresh_ip_ac_add_msg.setText("↑");
                         String msg = addPopupWindow.editText.getText().toString();
                         //上传
-                        sendMsgToClient(msg);
+                        EventBus.getDefault().post(msg);
                         //提示
                         Toast toast = Toast.makeText(this,
                                 "已下达指令!!!", Toast.LENGTH_SHORT);
@@ -203,6 +213,7 @@ public class Refresh_IP_Activity extends BaseActivity {
     /*
     *将文本数据上传到客户端
      */
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void sendMsgToClient(String msg) {
         String width = "0";
         for (HashMap<String, Object> object : clientList) {

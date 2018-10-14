@@ -3,10 +3,11 @@ package jr.subtitlescroll.weight;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.support.v4.widget.PopupWindowCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 
@@ -28,9 +29,9 @@ public class AddPopupWindow extends PopupWindow {
         // 设置SelectPicPopupWindow的View
         this.setContentView(conentView);
         // 设置SelectPicPopupWindow弹出窗体的宽
-        this.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        this.setWidth((int) (context.getResources().getDisplayMetrics().widthPixels*0.8));
         // 设置SelectPicPopupWindow弹出窗体的高
-        this.setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+        this.setHeight(1200);
         // 设置SelectPicPopupWindow弹出窗体可点击
         this.setFocusable(true);
         this.setOutsideTouchable(true);
@@ -54,7 +55,9 @@ public class AddPopupWindow extends PopupWindow {
         Log.e("AddPopupWindow", "onClick");
         if (!this.isShowing()) {
             // 以下拉方式显示popupwindow
-            this.showAsDropDown(parent, 20, 200);
+            int offX = (this.getWidth() - parent.getWidth()) / 2;
+            PopupWindowCompat.showAsDropDown(this, parent, -offX, -50, Gravity.START);
+            this.update();
         } else {
             this.dismiss();
         }
