@@ -26,6 +26,7 @@ public class Client extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             while (true) {
                 String msg = br.readLine();
+                if (msg != null && msg.equals("")) continue;
                 if (msg == null) {
                     try {
                         br.close();

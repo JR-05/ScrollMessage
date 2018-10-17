@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class MyAppliction extends Application {
     public ArrayList<HashMap<String, Object>> clientList;
     public int clientAccount = 0;
-    public String position;
+    public String position="-1";
     public float width;
 
 

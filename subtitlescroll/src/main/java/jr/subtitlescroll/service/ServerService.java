@@ -82,7 +82,7 @@ public class ServerService extends Service {
                 try {
                     serverSocket = new ServerSocket(5555);
                     while (true) {
-                        final Socket socket = serverSocket.accept();
+                        final Socket socket = serverSocket.accept();//accept方法是个阻塞方法，会一直等待客户端连接
                         //创建新的线程接受来自客户端发送的信息
                         Client client = new Client(socket, new Client.RecivedMessage() {
                             @Override
@@ -124,6 +124,7 @@ public class ServerService extends Service {
 
     //判断消息类型
     public void judgeMsg(String msg, Socket socket) {
+        if (msg.equals("")) return;
         try {
             JSONObject jsonObject = new JSONObject(msg);
             String key = jsonObject.getString("key");
@@ -156,7 +157,7 @@ public class ServerService extends Service {
                         bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                         JSONObject json = new JSONObject();
                         json.put("key", KEY_POSITION);
-                        json.put("position", ++appliction.clientAccount);
+                        json.put("position", String.valueOf(++appliction.clientAccount));
                         bw.write(json.toString() + "\n");
                         bw.newLine();
                         bw.flush();

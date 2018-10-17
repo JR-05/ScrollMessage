@@ -124,9 +124,9 @@ public class ClientService extends Service {
                     socket.setKeepAlive(true);
                     if (socket.isConnected()) {
                         //告诉MainActitivty，链接成功
-                        client = socket;
                         connect_successfull();
-                        //发送客户端信息给服务端
+                        client = socket;
+                        //发送客户端手机信息给服务端
                         MyAppliction myAppliction = (MyAppliction) getApplication();
                         String phoneBrand = android.os.Build.BRAND;
                         final JSONObject jsonObject = new JSONObject();
@@ -135,7 +135,7 @@ public class ClientService extends Service {
                         jsonObject.put("ip", GetWifiInfo.getInstance(getApplication()).getWifiInfo().get("ipAddress"));
                         jsonObject.put("offX", String.valueOf(myAppliction.width));
                         String msg = jsonObject.toString();
-                        Log.e("ClientService", "Messege:" + msg);
+                        Log.e("ClientService", "客户端连接服务端第一次发送的手机信息:" + msg);
                         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                         bw.write(msg + "\n");
                         bw.newLine();
@@ -155,7 +155,7 @@ public class ClientService extends Service {
                                 try {
                                     //发送信息到ClientService来断开服务器
                                     if (main_AC_Messenger != null) {
-                                        Log.d("MainActivity", "disConnect");
+                                        Log.e("ClientService", "disConnect");
                                         main_AC_Messenger.send(message);
                                     }
                                 } catch (RemoteException e) {
@@ -225,7 +225,7 @@ public class ClientService extends Service {
                     break;
                 }
                 case KEY_START: {
-                    Log.e("ClientService", "clientAccount:"+jsonObject.getString("clientAccount"));
+                    Log.e("ClientService", "clientAccount:" + jsonObject.getString("clientAccount"));
                     ((MyAppliction) getApplication()).clientAccount = Integer.valueOf(jsonObject.getString("clientAccount"));
                     Message message = new Message();
                     message.what = SCOLLSUBTITLE;
@@ -278,20 +278,26 @@ public class ClientService extends Service {
     }
 
     public void nextScroll() {
-        final JSONObject jsonObject = new JSONObject();
-        try {
-            MyAppliction appliction = (MyAppliction) getApplication();
-            jsonObject.put("key", KEY_NEXT_Client_SCROLL);
-            jsonObject.put("position", appliction.position);
-            String msg = jsonObject.toString();
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-            bw.write(msg + "\n");
-            bw.newLine();
-            bw.flush();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final JSONObject jsonObject = new JSONObject();
+                try {
+                    MyAppliction appliction = (MyAppliction) getApplication();
+                    jsonObject.put("key", KEY_NEXT_Client_SCROLL);
+                    jsonObject.put("position", appliction.position);
+                    String msg = jsonObject.toString();
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+                    bw.write(msg + "\n");
+                    bw.newLine();
+                    bw.flush();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
     }
 }

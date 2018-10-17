@@ -137,6 +137,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void loadData() {
+        //判断是否开启wifi选择主客端
         if (isWifiApEnabled) {
             //服务端
             Intent intent = new Intent(MainActivity.this, ServerService.class);
